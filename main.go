@@ -1,88 +1,71 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
+	"golang-web-api/book"
+	"golang-web-api/handler"
+	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func main() {
+	dsn := "root:@tcp(127.0.0.1:3306)/golearn?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatal("Db connection failed")
+	}
+
+	db.AutoMigrate(&book.Book{})
+
+	// CRUD
+
+	// ===========
+	// CREATE data
+	// ===========
+
+	// book := book.Book{}
+	// book.Title = "Dekat"
+	// book.Price = 120000
+	// book.Discount = 20
+	// book.Rating = 5
+	// book.Description = "Buku tentang arti dekat"
+
+	// err = db.Create(&book).Error
+	// if err != nil {
+	// 	fmt.Println("==========================")
+	// 	fmt.Println("Error creating book record")
+	// 	fmt.Println("==========================")
+	// }
+
+	var books []book.Book
+
+	// err = db.Debug().Find(&books).Error // Get all
+	err = db.Debug().Where("rating = ?", 5).Find(&books).Error
+
+	if err != nil {
+		fmt.Println("=========================")
+		fmt.Println("Error finding book record")
+		fmt.Println("=========================")
+	}
+
+	for _, b := range books {
+		fmt.Println("Title:", b.Title)
+		fmt.Println("book object %v", b)
+	}
+
 	router := gin.Default()
 
 	v1 := router.Group("/v1")
 
-	v1.GET("/", rootHandler)
-	v1.GET("/hello", helloHandler)
-	v1.GET("/book/:id/:title", bookHandler)
-	v1.GET("/book", bookQueryHandler)
+	v1.GET("/", handler.RootHandler)
+	v1.GET("/hello", handler.HelloHandler)
+	v1.GET("/book/:id/:title", handler.BookHandler)
+	v1.GET("/book", handler.BookQueryHandler)
 
-	v1.POST("/book", postBookHandler)
+	v1.POST("/book", handler.PostBookHandler)
 
 	router.Run(":8000")
-}
-
-func rootHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"name": "Panji Kusumarizki",
-		"bio":  "A Backend Developer",
-	})
-}
-
-func helloHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"name": "Ervina Mulya",
-		"bio":  "A Customer Service",
-	})
-}
-
-func bookHandler(c *gin.Context) {
-	id := c.Param("id")
-	title := c.Param("title")
-
-	c.JSON(http.StatusOK, gin.H{"id": id, "title": title})
-}
-
-func bookQueryHandler(c *gin.Context) {
-	title := c.Query("title")
-	price := c.Query("price")
-
-	c.JSON(http.StatusOK, gin.H{
-		"title": title,
-		"price": price,
-	})
-}
-
-type BookInput struct {
-	Title string      `json:"title" binding:"required"`
-	Price json.Number `json:"price" binding:"required,number"`
-	// SubTitle string `json:"sub_title"`
-}
-
-func postBookHandler(c *gin.Context) {
-	var bookInput BookInput
-
-	err := c.ShouldBindJSON(&bookInput)
-	if err != nil {
-
-		errorMessages := []string{}
-		for _, e := range err.(validator.ValidationErrors) {
-			errorMessage := fmt.Sprintf("Error on filed %s, condition: %s", e.Field(), e.ActualTag())
-			errorMessages = append(errorMessages, errorMessage)
-
-			c.JSON(http.StatusBadRequest, gin.H{
-				"errors": errorMessages,
-			})
-
-			return
-		}
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"title": bookInput.Title,
-		"price": bookInput.Price,
-		// "sub_title": bookInput.SubTitle,
-	})
 }
