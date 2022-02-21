@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"golang-web-api/book"
 	"golang-web-api/handler"
 	"log"
@@ -22,36 +21,15 @@ func main() {
 
 	bookRepository := book.NewRepository(db)
 	bookService := book.NewService(bookRepository)
-
-	// Find all
-	books, err := bookService.FindAll()
-
-	for _, book := range books {
-		fmt.Println("Title:", book.Title)
-	}
-
-	// Find by ID
-	// book, err := bookService.FindByID(2)
-	// fmt.Println("Title:", book.Title)
-
-	// Create
-	// bookRequest := book.BookRequest{
-	// 	Title: "Hmmm",
-	// 	Price: "100000",
-	// }
-
-	// bookService.Create(bookRequest)
+	bookHandler := handler.NewBookHandler(bookService)
 
 	router := gin.Default()
 
 	v1 := router.Group("/v1")
 
-	v1.GET("/", handler.RootHandler)
-	v1.GET("/hello", handler.HelloHandler)
-	v1.GET("/book/:id/:title", handler.BookHandler)
-	v1.GET("/book", handler.BookQueryHandler)
-
-	v1.POST("/book", handler.PostBookHandler)
+	v1.GET("/books", bookHandler.GetBooks)
+	v1.GET("/books/:id", bookHandler.GetBook)
+	v1.POST("/book", bookHandler.CreateBook)
 
 	router.Run(":8000")
 }

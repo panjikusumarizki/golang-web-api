@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -10,41 +11,60 @@ import (
 	"golang-web-api/book"
 )
 
-func RootHandler(c *gin.Context) {
+type bookHandler struct {
+	bookService book.Service
+}
+
+func NewBookHandler(bookService book.Service) *bookHandler {
+	return &bookHandler{bookService}
+}
+
+func (h *bookHandler) GetBooks(c *gin.Context) {
+	books, err := h.bookService.FindAll()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	var booksResponse []book.BookResponse
+
+	for _, b := range books {
+		bookResponse := convertResponse(b)
+
+		booksResponse = append(booksResponse, bookResponse)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"name": "Panji Kusumarizki",
-		"bio":  "A Backend Developer",
+		"data": booksResponse,
 	})
 }
 
-func HelloHandler(c *gin.Context) {
+func (h *bookHandler) GetBook(c *gin.Context) {
+	idString := c.Param("id")
+	id, _ := strconv.Atoi(idString)
+
+	b, err := h.bookService.FindByID(id)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	bookResponse := convertResponse(b)
+
 	c.JSON(http.StatusOK, gin.H{
-		"name": "Nive",
-		"bio":  "A Customer Service",
+		"data": bookResponse,
 	})
 }
 
-func BookHandler(c *gin.Context) {
-	id := c.Param("id")
-	title := c.Param("title")
+func (h *bookHandler) CreateBook(c *gin.Context) {
+	var bookRequest book.BookRequest
 
-	c.JSON(http.StatusOK, gin.H{"id": id, "title": title})
-}
-
-func BookQueryHandler(c *gin.Context) {
-	title := c.Query("title")
-	price := c.Query("price")
-
-	c.JSON(http.StatusOK, gin.H{
-		"title": title,
-		"price": price,
-	})
-}
-
-func PostBookHandler(c *gin.Context) {
-	var bookInput book.BookRequest
-
-	err := c.ShouldBindJSON(&bookInput)
+	err := c.ShouldBindJSON(&bookRequest)
 	if err != nil {
 
 		errorMessages := []string{}
@@ -60,9 +80,26 @@ func PostBookHandler(c *gin.Context) {
 		}
 	}
 
+	book, err := h.bookService.Create(bookRequest)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"title": bookInput.Title,
-		"price": bookInput.Price,
-		// "sub_title": bookInput.SubTitle,
+		"data": book,
 	})
+}
+
+func convertResponse(b book.Book) book.BookResponse {
+	return book.BookResponse{
+		ID:          b.ID,
+		Title:       b.Title,
+		Price:       b.Price,
+		Description: b.Description,
+		Rating:      b.Rating,
+		Discount:    b.Discount,
+	}
 }
