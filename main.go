@@ -49,6 +49,7 @@ func main() {
 	// book.Title = "Blokkkkk"
 	// book, err = bookRepository.Update(book)
 
+	// Delete
 	book, err = bookRepository.Delete(book)
 
 	router := gin.Default()
