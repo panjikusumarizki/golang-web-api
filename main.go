@@ -40,20 +40,50 @@ func main() {
 	// 	fmt.Println("==========================")
 	// }
 
-	var books []book.Book
+	// ===========
+	// GET data
+	// ===========
+	// var books []book.Book
 
 	// err = db.Debug().Find(&books).Error // Get all
-	err = db.Debug().Where("rating = ?", 5).Find(&books).Error
+	// err = db.Debug().Where("rating = ?", 5).Find(&books).Error
 
+	// if err != nil {
+	// 	fmt.Println("=========================")
+	// 	fmt.Println("Error finding book record")
+	// 	fmt.Println("=========================")
+	// }
+
+	// for _, b := range books {
+	// 	fmt.Println("Title:", b.Title)
+	// 	fmt.Println("book object %v", b)
+	// }
+
+	var book book.Book
+
+	err = db.Debug().Where("id = ?", 1).First(&book).Error
 	if err != nil {
 		fmt.Println("=========================")
 		fmt.Println("Error finding book record")
 		fmt.Println("=========================")
 	}
 
-	for _, b := range books {
-		fmt.Println("Title:", b.Title)
-		fmt.Println("book object %v", b)
+	// ===========
+	// UPDATE data
+	// ===========
+	// book.Title = "Jauh 2"
+	// err = db.Save(&book).Error
+	// if err != nil {
+	// 	fmt.Println("=========================")
+	// 	fmt.Println("Error updating book record")
+	// 	fmt.Println("=========================")
+	// }
+
+	err = db.Delete(&book).Error
+	if err != nil {
+		fmt.Println("=========================")
+		fmt.Println("Error deleting book record")
+		fmt.Println("=========================")
 	}
 
 	router := gin.Default()
