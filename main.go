@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"golang-web-api/book"
 	"golang-web-api/handler"
 	"log"
@@ -20,71 +19,37 @@ func main() {
 
 	db.AutoMigrate(&book.Book{})
 
-	// CRUD
+	bookRepository := book.NewRepository(db)
 
-	// ===========
-	// CREATE data
-	// ===========
+	// Find All
+	// books, err := bookRepository.FindAll()
 
-	// book := book.Book{}
-	// book.Title = "Dekat"
-	// book.Price = 120000
-	// book.Discount = 20
-	// book.Rating = 5
-	// book.Description = "Buku tentang arti dekat"
-
-	// err = db.Create(&book).Error
-	// if err != nil {
-	// 	fmt.Println("==========================")
-	// 	fmt.Println("Error creating book record")
-	// 	fmt.Println("==========================")
+	// for _, book := range books {
+	// 	fmt.Println("Title:", book.Title)
 	// }
 
-	// ===========
-	// GET data
-	// ===========
-	// var books []book.Book
+	// Find By ID
+	// book, err := bookRepository.FindByID(2)
+	// fmt.Println("Title:", book.Title)
 
-	// err = db.Debug().Find(&books).Error // Get all
-	// err = db.Debug().Where("rating = ?", 5).Find(&books).Error
-
-	// if err != nil {
-	// 	fmt.Println("=========================")
-	// 	fmt.Println("Error finding book record")
-	// 	fmt.Println("=========================")
+	// Create
+	// book := book.Book{
+	// 	Title:       "Koplok",
+	// 	Description: "Goblok looo!!!!!!",
+	// 	Price:       200000,
+	// 	Rating:      5,
+	// 	Discount:    0,
 	// }
 
-	// for _, b := range books {
-	// 	fmt.Println("Title:", b.Title)
-	// 	fmt.Println("book object %v", b)
-	// }
-
+	// bookRepository.Create(book)
 	var book book.Book
+	book, err = bookRepository.FindByID(3)
 
-	err = db.Debug().Where("id = ?", 1).First(&book).Error
-	if err != nil {
-		fmt.Println("=========================")
-		fmt.Println("Error finding book record")
-		fmt.Println("=========================")
-	}
+	// Update
+	// book.Title = "Blokkkkk"
+	// book, err = bookRepository.Update(book)
 
-	// ===========
-	// UPDATE data
-	// ===========
-	// book.Title = "Jauh 2"
-	// err = db.Save(&book).Error
-	// if err != nil {
-	// 	fmt.Println("=========================")
-	// 	fmt.Println("Error updating book record")
-	// 	fmt.Println("=========================")
-	// }
-
-	err = db.Delete(&book).Error
-	if err != nil {
-		fmt.Println("=========================")
-		fmt.Println("Error deleting book record")
-		fmt.Println("=========================")
-	}
+	book, err = bookRepository.Delete(book)
 
 	router := gin.Default()
 
