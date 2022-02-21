@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"golang-web-api/book"
 	"golang-web-api/handler"
 	"log"
@@ -20,37 +21,26 @@ func main() {
 	db.AutoMigrate(&book.Book{})
 
 	bookRepository := book.NewRepository(db)
+	bookService := book.NewService(bookRepository)
 
-	// Find All
-	// books, err := bookRepository.FindAll()
+	// Find all
+	books, err := bookService.FindAll()
 
-	// for _, book := range books {
-	// 	fmt.Println("Title:", book.Title)
-	// }
+	for _, book := range books {
+		fmt.Println("Title:", book.Title)
+	}
 
-	// Find By ID
-	// book, err := bookRepository.FindByID(2)
+	// Find by ID
+	// book, err := bookService.FindByID(2)
 	// fmt.Println("Title:", book.Title)
 
 	// Create
-	// book := book.Book{
-	// 	Title:       "Koplok",
-	// 	Description: "Goblok looo!!!!!!",
-	// 	Price:       200000,
-	// 	Rating:      5,
-	// 	Discount:    0,
+	// bookRequest := book.BookRequest{
+	// 	Title: "Hmmm",
+	// 	Price: "100000",
 	// }
 
-	// bookRepository.Create(book)
-	var book book.Book
-	book, err = bookRepository.FindByID(3)
-
-	// Update
-	// book.Title = "Blokkkkk"
-	// book, err = bookRepository.Update(book)
-
-	// Delete
-	book, err = bookRepository.Delete(book)
+	// bookService.Create(bookRequest)
 
 	router := gin.Default()
 

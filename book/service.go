@@ -4,6 +4,8 @@ type Service interface {
 	FindAll() ([]Book, error)
 	FindByID(ID int) (Book, error)
 	Create(bookRequest BookRequest) (Book, error)
+	Update(bookRequest BookRequest) (Book, error)
+	Delete(bookRequest BookRequest) (Book, error)
 }
 
 type service struct {
